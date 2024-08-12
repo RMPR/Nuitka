@@ -188,10 +188,8 @@ static Nuitka_DictEntryHandle GET_STRING_DICT_ENTRY(PyDictObject *dict, Nuitka_S
 
     if (value == NULL) {
         return NULL;
-#ifndef PY_NOGIL
     } else if (_PyDict_HasSplitTable(dict)) {
         return &dict->ma_values[ix];
-#endif
     } else {
         return &DK_ENTRIES(dict->ma_keys)[ix].me_value;
     }
@@ -282,21 +280,24 @@ NUITKA_MAY_BE_UNUSED static void UPDATE_STRING_DICT0(PyDictObject *dict, Nuitka_
 
     PyObject *old = GET_DICT_ENTRY_VALUE(entry);
 
-    // Values are more likely (more often) set than not set, in that case
-    // speculatively try the quickest access method.
-    if (likely(old != NULL)) {
-        Py_INCREF(value);
-        SET_DICT_ENTRY_VALUE(entry, value);
+    if (value != old) {
+
+        // Values are more likely (more often) set than not set, in that case
+        // speculatively try the quickest access method.
+        if (likely(old != NULL)) {
+            Py_INCREF(value);
+            SET_DICT_ENTRY_VALUE(entry, value);
 
 #if PYTHON_VERSION >= 0x300
-        dict->ma_version_tag += 1;
+            dict->ma_version_tag += 1;
 #endif
 
-        CHECK_OBJECT(old);
+            CHECK_OBJECT(old);
 
-        Py_DECREF(old);
-    } else {
-        DICT_SET_ITEM((PyObject *)dict, (PyObject *)key, value);
+            Py_DECREF(old);
+        } else {
+            DICT_SET_ITEM((PyObject *)dict, (PyObject *)key, value);
+        }
     }
 }
 
@@ -319,18 +320,23 @@ NUITKA_MAY_BE_UNUSED static void UPDATE_STRING_DICT_INPLACE(PyDictObject *dict, 
 
     PyObject *old = GET_DICT_ENTRY_VALUE(entry);
 
-    // Values are more likely (more often) set than not set, in that case
-    // speculatively try the quickest access method.
-    if (likely(old != NULL)) {
-        SET_DICT_ENTRY_VALUE(entry, value);
+    if (old != value) {
+        // Values are more likely (more often) set than not set, in that case
+        // speculatively try the quickest access method.
+        if (likely(old != NULL)) {
+            SET_DICT_ENTRY_VALUE(entry, value);
 
 #if PYTHON_VERSION >= 0x300
-        dict->ma_version_tag += 1;
+            dict->ma_version_tag += 1;
 #endif
-    } else {
-        DICT_SET_ITEM((PyObject *)dict, (PyObject *)key, value);
-        Py_DECREF(value);
+        } else {
+            DICT_SET_ITEM((PyObject *)dict, (PyObject *)key, value);
+            Py_DECREF(value);
 
+            CHECK_OBJECT(value);
+        }
+    } else {
+        Py_DECREF(value);
         CHECK_OBJECT(value);
     }
 }
@@ -354,19 +360,24 @@ NUITKA_MAY_BE_UNUSED static void UPDATE_STRING_DICT1(PyDictObject *dict, Nuitka_
 
     PyObject *old = GET_DICT_ENTRY_VALUE(entry);
 
-    // Values are more likely (more often) set than not set, in that case
-    // speculatively try the quickest access method.
-    if (likely(old != NULL)) {
-        SET_DICT_ENTRY_VALUE(entry, value);
+    if (old != value) {
+        // Values are more likely (more often) set than not set, in that case
+        // speculatively try the quickest access method.
+        if (likely(old != NULL)) {
+            SET_DICT_ENTRY_VALUE(entry, value);
 
 #if PYTHON_VERSION >= 0x300
-        dict->ma_version_tag += 1;
+            dict->ma_version_tag += 1;
 #endif
 
-        Py_DECREF(old);
-    } else {
-        DICT_SET_ITEM((PyObject *)dict, (PyObject *)key, value);
+            Py_DECREF(old);
+        } else {
+            DICT_SET_ITEM((PyObject *)dict, (PyObject *)key, value);
 
+            Py_DECREF(value);
+            CHECK_OBJECT(value);
+        }
+    } else {
         Py_DECREF(value);
         CHECK_OBJECT(value);
     }
