@@ -144,6 +144,8 @@ struct _dictkeysobject {
 typedef PyObject **Nuitka_DictEntryHandle;
 
 #if PYTHON_VERSION >= 0x3b0
+extern Py_ssize_t Nuitka_Py_unicodekeys_lookup_unicode(PyDictKeysObject *dk, PyObject *key, Py_hash_t hash);
+
 extern Py_ssize_t Nuitka_PyDictLookup(PyDictObject *mp, PyObject *key, Py_hash_t hash, PyObject ***value_addr);
 extern Py_ssize_t Nuitka_PyDictLookupStr(PyDictObject *mp, PyObject *key, Py_hash_t hash, PyObject ***value_addr);
 #endif
@@ -288,7 +290,7 @@ NUITKA_MAY_BE_UNUSED static void UPDATE_STRING_DICT0(PyDictObject *dict, Nuitka_
             Py_INCREF(value);
             SET_DICT_ENTRY_VALUE(entry, value);
 
-#if PYTHON_VERSION >= 0x300
+#if PYTHON_VERSION >= 0x360
             dict->ma_version_tag += 1;
 #endif
 
@@ -326,7 +328,7 @@ NUITKA_MAY_BE_UNUSED static void UPDATE_STRING_DICT_INPLACE(PyDictObject *dict, 
         if (likely(old != NULL)) {
             SET_DICT_ENTRY_VALUE(entry, value);
 
-#if PYTHON_VERSION >= 0x300
+#if PYTHON_VERSION >= 0x360
             dict->ma_version_tag += 1;
 #endif
         } else {
@@ -366,7 +368,7 @@ NUITKA_MAY_BE_UNUSED static void UPDATE_STRING_DICT1(PyDictObject *dict, Nuitka_
         if (likely(old != NULL)) {
             SET_DICT_ENTRY_VALUE(entry, value);
 
-#if PYTHON_VERSION >= 0x300
+#if PYTHON_VERSION >= 0x360
             dict->ma_version_tag += 1;
 #endif
 

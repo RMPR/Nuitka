@@ -90,6 +90,9 @@ void checkModuleConstants_%(module_identifier)s(PyThreadState *tstate) {
 }
 #endif
 
+// Accessors to module variables.
+%(module_variable_accessors)s
+
 // The module code objects.
 %(module_code_objects_decl)s
 
